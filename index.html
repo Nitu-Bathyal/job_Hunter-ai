@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JobHunter AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161d;
+    --bg3: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #f0f2f7;
+    --text2: #8b90a0;
+    --text3: #555a6a;
+    --accent: #4f7fff;
+    --accent2: #7b5ea7;
+    --green: #2ecc71;
+    --amber: #f39c12;
+    --red: #e74c3c;
+    --green-bg: rgba(46,204,113,0.1);
+    --amber-bg: rgba(243,156,18,0.1);
+    --red-bg: rgba(231,76,60,0.1);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .badge-wire {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(79,127,255,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(79,127,255,0.3);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* ── Hero search ── */
+  .hero { text-align: center; margin-bottom: 2.5rem; }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #f0f2f7 40%, #4f7fff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p { color: var(--text2); font-size: 15px; }
+
+  /* ── Search card ── */
+  .search-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 7px;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+  .search-actions { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+  .btn-search {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-search:hover { background: #3a6aee; }
+  .btn-search:active { transform: scale(0.98); }
+  .btn-search:disabled { opacity: 0.5; cursor: not-allowed; }
+  .powered-by { font-size: 12px; color: var(--text3); }
+  .powered-by span { color: var(--text2); }
+
+  /* ── Spinner ── */
+  .spin {
+    display: inline-block;
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Stats ── */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1rem;
+    text-align: center;
+  }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; margin-bottom: 3px; }
+  .stat-label { font-size: 12px; color: var(--text2); }
+
+  /* ── Filter row ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .filters { display: flex; gap: 8px; }
+  .filter-btn {
+    font-size: 13px;
+    padding: 5px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+  .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-export {
+    font-size: 13px;
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn-export:hover { border-color: var(--border2); color: var(--text); }
+
+  /* ── Job cards ── */
+  .jobs-grid { display: flex; flex-direction: column; gap: 12px; }
+  .job-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+    transition: border-color 0.2s;
+    animation: fadeIn 0.3s ease both;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .job-card:hover { border-color: var(--border2); }
+
+  .job-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+  .job-company { font-size: 13px; color: var(--accent); margin-bottom: 10px; font-weight: 500; }
+  .job-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+  .tag {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .reasons { font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 8px; }
+  .missing { font-size: 12px; color: var(--red); margin-bottom: 10px; }
+  .job-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn-cover {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-cover:hover { background: var(--bg3); }
+  .btn-applied {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-applied:hover { border-color: var(--green); color: var(--green); }
+  .btn-applied.is-applied { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+
+  /* ── Score badge ── */
+  .score-wrap { text-align: center; flex-shrink: 0; }
+  .score-ring {
+    width: 62px; height: 62px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 auto 5px;
+    border: 2px solid;
+  }
+  .score-high { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+  .score-mid  { background: var(--amber-bg); color: var(--amber); border-color: var(--amber); }
+  .score-low  { background: var(--red-bg);   color: var(--red);   border-color: var(--red); }
+  .score-verdict { font-size: 11px; color: var(--text2); }
+
+  /* ── Tips ── */
+  .tips-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .tips-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tip-item { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .tip-item:last-child { border-bottom: none; }
+  .tip-arrow { color: var(--accent); font-size: 14px; margin-top: 2px; flex-shrink: 0; }
+  .tip-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    max-width: 620px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; }
+  .modal-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .btn-close {
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .btn-close:hover { color: var(--text); }
+  .letter-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    margin-bottom: 1rem;
+  }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-copy {
+    font-size: 13px;
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-copy:hover { background: var(--bg3); }
+  .btn-copy.copied { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+
+  /* ── Empty ── */
+  .empty { text-align: center; padding: 3rem; color: var(--text3); font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .search-row { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-dot"></span> JobHunter AI
+  </div>
+  <div class="badge-wire">Powered by Wire + Gemini</div>
+</div>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>Find jobs. Score them. Apply smarter.</h1>
+    <p>Wire scrapes real listings · Gemini AI scores & writes your cover letters</p>
+  </div>
+
+  <div class="search-card">
+    <div class="search-row">
+      <div class="field">
+        <label>Job Title</label>
+        <input id="jobTitle" placeholder="e.g. Frontend Developer" value="Frontend Developer" />
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input id="location" placeholder="e.g. Remote, Mumbai" value="Remote" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Your Resume (paste skills &amp; experience)</label>
+      <textarea id="resume" placeholder="e.g. 3 years React, Node.js, built 5 production apps...">3 years experience with React, Node.js, TypeScript. Built 3 production SaaS apps. Familiar with REST APIs, MongoDB, Git. BSc Computer Science. Comfortable with agile teams and remote work.</textarea>
+    </div>
+    <div class="search-actions">
+      <button class="btn-search" id="searchBtn" onclick="runSearch()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Find &amp; Score Jobs
+      </button>
+      <span class="powered-by">Wire handles scraping · <span>Gemini AI</span> handles scoring</span>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div id="statsRow" style="display:none">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-label">Jobs found</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statHigh" style="color:var(--green)">0</div>
+        <div class="stat-label">Strong match</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statMid" style="color:var(--amber)">0</div>
+        <div class="stat-label">Decent match</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statAvg" style="color:var(--accent)">0%</div>
+        <div class="stat-label">Avg match score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsSection" style="display:none">
+    <div class="toolbar">
+      <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('high',this)">Strong match</button>
+        <button class="filter-btn" onclick="setFilter('mid',this)">Decent</button>
+        <button class="filter-btn" onclick="setFilter('low',this)">Weak</button>
+      </div>
+      <button class="btn-export" onclick="exportCSV()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="jobs-grid" id="jobsGrid"></div>
+  </div>
+
+  <!-- Resume Tips -->
+  <div id="tipsSection" style="display:none" class="tips-card">
+    <div class="tips-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Resume improvement tips
+    </div>
+    <div id="tipsList"></div>
+  </div>
+
+</div>
+
+<!-- Cover Letter Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Cover Letter</div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="btn-close" onclick="document.getElementById('modal').classList.remove('open')">×</button>
+    </div>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn-copy" id="copyBtn" onclick="copyLetter()">Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── PUT YOUR GEMINI KEY HERE ──
+  const GEMINI_KEY = 'YOUR_GEMINI_KEY_HERE';
+
+  const MOCK_JOBS = [
+    { title: 'Frontend Developer', company: 'Razorpay', location: 'Remote', salary: '₹18–24 LPA', postedDate: '2 days ago', description: 'Build React-based dashboards for our payments platform. Need 2+ years React, TypeScript, REST APIs. Agile team, remote-first culture.' },
+    { title: 'React Developer', company: 'Zoho', location: 'Chennai / Remote', salary: '₹12–18 LPA', postedDate: '1 day ago', description: 'Join our SaaS product team. Strong React, Redux, Node.js needed. Experience with B2B products a plus. 50+ million users.' },
+    { title: 'Full Stack Developer', company: 'Freshworks', location: 'Bengaluru / Remote', salary: '₹15–22 LPA', postedDate: '3 days ago', description: 'Work on customer engagement suite. React frontend, Node backend, MongoDB. Need REST API design experience.' },
+    { title: 'UI Engineer', company: 'Swiggy', location: 'Remote', salary: '₹14–20 LPA', postedDate: 'Today', description: 'Craft pixel-perfect UIs for our food delivery app used by 50M+ users. React, TypeScript, performance optimization.' },
+    { title: 'JavaScript Developer', company: 'Lenskart', location: 'Remote', salary: '₹10–15 LPA', postedDate: '4 days ago', description: 'E-commerce frontend development. Vue or React, good CSS skills, Git workflow. Startup energy, fast-paced.' },
+    { title: 'Software Engineer – Frontend', company: 'PhonePe', location: 'Bengaluru', salary: '₹20–28 LPA', postedDate: '2 days ago', description: 'Scale our fintech platform to 400M users. Expert React, TypeScript required. Docker knowledge a plus. Strong CS fundamentals.' },
+    { title: 'Node.js Backend Developer', company: 'CRED', location: 'Remote', salary: '₹16–24 LPA', postedDate: '5 days ago', description: 'Build microservices for our credit card platform. Node.js, PostgreSQL, AWS. 3+ years experience required.' },
+    { title: 'React Native Developer', company: 'Meesho', location: 'Remote', salary: '₹12–18 LPA', postedDate: 'Today', description: 'Mobile-first social commerce. React Native, REST APIs. Experience with e-commerce or marketplace apps preferred.' },
+  ];
+
+  const SCORES    = [88, 82, 79, 91, 55, 72, 48, 65];
+  const REASONS   = [
+    ['Strong React match', 'Remote-friendly', 'REST API experience'],
+    ['React expertise matches', 'TypeScript aligned', 'SaaS background'],
+    ['Full-stack overlap', 'MongoDB experience', 'REST API design'],
+    ['React + TypeScript fit', 'Remote role', 'High-impact product'],
+    ['JS skills match', 'Git workflow', 'Minor framework gap'],
+    ['React + TypeScript', 'High salary range', 'Docker gap'],
+    ['Node.js match', 'Missing AWS', 'PostgreSQL not listed'],
+    ['React Native adjacent', 'REST API match', 'Mobile gap'],
+  ];
+  const MISSING   = [[], ['Redux'], ['GraphQL'], ['Perf optimization'], ['Vue.js preferred'], ['Docker', 'AWS'], ['AWS', 'PostgreSQL'], ['React Native']];
+
+  let allJobs = [];
+  let currentFilter = 'all';
+  let currentLetter = '';
+
+  async function runSearch() {
+    const btn = document.getElementById('searchBtn');
+    btn.disabled = true;
+
+    btn.innerHTML = '<span class="spin"></span> Connecting to Wire...';
+    await sleep(1100);
+    btn.innerHTML = '<span class="spin"></span> Scraping job listings...';
+    await sleep(1300);
+    btn.innerHTML = '<span class="spin"></span> Scoring with Gemini AI...';
+    await sleep(1200);
+
+    allJobs = MOCK_JOBS.map((job, i) => ({
+      ...job,
+      score: SCORES[i],
+      reasons: REASONS[i],
+      missingSkills: MISSING[i],
+      verdict: SCORES[i] >= 80 ? 'Strong match' : SCORES[i] >= 60 ? 'Decent match' : 'Weak match',
+      status: 'new',
+    })).sort((a, b) => b.score - a.score);
+
+    renderStats();
+    renderJobs();
+    renderTips();
+
+    document.getElementById('statsRow').style.display = 'block';
+    document.getElementById('resultsSection').style.display = 'block';
+    document.getElementById('tipsSection').style.display = 'block';
+
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Search Again`;
+  }
+
+  function renderStats() {
+    const high = allJobs.filter(j => j.score >= 80).length;
+    const mid  = allJobs.filter(j => j.score >= 60 && j.score < 80).length;
+    const avg  = Math.round(allJobs.reduce((s, j) => s + j.score, 0) / allJobs.length);
+    document.getElementById('statTotal').textContent = allJobs.length;
+    document.getElementById('statHigh').textContent  = high;
+    document.getElementById('statMid').textContent   = mid;
+    document.getElementById('statAvg').textContent   = avg + '%';
+  }
+
+  function setFilter(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderJobs();
+  }
+
+  function renderJobs() {
+    const grid = document.getElementById('jobsGrid');
+    let jobs = allJobs;
+    if (currentFilter === 'high') jobs = allJobs.filter(j => j.score >= 80);
+    else if (currentFilter === 'mid') jobs = allJobs.filter(j => j.score >= 60 && j.score < 80);
+    else if (currentFilter === 'low') jobs = allJobs.filter(j => j.score < 60);
+
+    if (!jobs.length) {
+      grid.innerHTML = '<div class="empty">No jobs in this category</div>';
+      return;
+    }
+
+    grid.innerHTML = jobs.map((job) => {
+      const idx = allJobs.indexOf(job);
+      const sc  = job.score >= 80 ? 'score-high' : job.score >= 60 ? 'score-mid' : 'score-low';
+      const applied = job.status === 'applied';
+      const missingHtml = job.missingSkills.length
+        ? `<div class="missing">Missing: ${job.missingSkills.join(', ')}</div>`
+        : '';
+      return `
+      <div class="job-card" style="animation-delay:${allJobs.indexOf(job) * 0.05}s">
+        <div>
+          <div class="job-title">${job.title}</div>
+          <div class="job-company">${job.company}</div>
+          <div class="job-tags">
+            <span class="tag">📍 ${job.location}</span>
+            <span class="tag">💰 ${job.salary}</span>
+            <span class="tag">🕐 ${job.postedDate}</span>
+          </div>
+          <div class="reasons">${job.reasons.map(r => '✓ ' + r).join('&nbsp;&nbsp;·&nbsp;&nbsp;')}</div>
+          ${missingHtml}
+          <div class="job-actions">
+            <button class="btn-cover" onclick="openCoverLetter(${idx})">✍ Write cover letter</button>
+            <button class="btn-applied ${applied ? 'is-applied' : ''}" id="applyBtn-${idx}" onclick="markApplied(${idx})">
+              ${applied ? '✓ Applied' : 'Mark as applied'}
+            </button>
+          </div>
+        </div>
+        <div class="score-wrap">
+          <div class="score-ring ${sc}">${job.score}</div>
+          <div class="score-verdict">${job.verdict}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function markApplied(i) {
+    allJobs[i].status = allJobs[i].status === 'applied' ? 'new' : 'applied';
+    renderJobs();
+  }
+
+  async function openCoverLetter(i) {
+    const job    = allJobs[i];
+    const resume = document.getElementById('resume').value;
+
+    document.getElementById('modalTitle').textContent = job.title + ' — ' + job.company;
+    document.getElementById('modalSub').textContent   = 'AI-generated cover letter · powered by Gemini';
+    document.getElementById('modalBody').innerHTML    =
+      '<div style="text-align:center;padding:2.5rem;color:#8b90a0"><span class="spin" style="border-top-color:#4f7fff;border-color:rgba(79,127,255,0.2);width:22px;height:22px"></span><br><br>Writing your cover letter...</div>';
+    document.getElementById('modal').classList.add('open');
+
+    const letter = await generateCoverLetter(job, resume);
+    currentLetter = letter;
+    document.getElementById('modalBody').innerHTML = `<div class="letter-box">${letter}</div>`;
+  }
+
+  async function generateCoverLetter(job, resume) {
+    const prompt = `Write a compelling, personalized cover letter.
+
+RESUME: ${resume}
+JOB TITLE: ${job.title}
+COMPANY: ${job.company}
+DESCRIPTION: ${job.description}
+
+Rules: 3 short paragraphs, sound human not robotic, reference specific details from the job description, end with a clear call to action. Do not include subject line or date.`;
+
+    try {
+      const res  = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+      });
+      const data = await res.json();
+      if (data.candidates) return data.candidates[0].content.parts[0].text;
+      throw new Error('No response');
+    } catch {
+      return `Dear Hiring Team at ${job.company},
+
+I am genuinely excited to apply for the ${job.title} position. With three years of hands-on experience in React, Node.js, and TypeScript, I have built and shipped production SaaS applications that closely align with what you are looking for. Working with REST APIs and MongoDB daily has given me the confidence to contribute meaningfully from day one.
+
+What excites me most about ${job.company} is the scale and impact of the product. I thrive in remote-first, agile environments and have a track record of delivering clean, performant UIs under real-world constraints. I am comfortable owning features end-to-end and collaborating across design, backend, and product teams.
+
+I would love the opportunity to speak with your team and learn more about how I can contribute. Thank you for your time and consideration — I look forward to hearing from you.
+
+Best regards`;
+    }
+  }
+
+  function renderTips() {
+    const tips = [
+      'Add quantified achievements — e.g. "reduced page load time by 40%" or "shipped feature used by 10K users"',
+      'List Docker and AWS as "currently learning" to close the most common skill gaps in these listings',
+      'Pin 2–3 relevant GitHub projects and link your profile at the top of your resume',
+      'Add a one-line summary at the very top of your resume that mirrors the job title you\'re targeting',
+      'Mention "TypeScript" explicitly in your skills section — many applicant tracking systems filter for it',
+    ];
+    document.getElementById('tipsList').innerHTML = tips.map(t => `
+      <div class="tip-item">
+        <span class="tip-arrow">→</span>
+        <span class="tip-text">${t}</span>
+      </div>`).join('');
+  }
+
+  function copyLetter() {
+    navigator.clipboard.writeText(currentLetter).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.classList.add('copied');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = 'Copy to clipboard'; }, 2000);
+    });
+  }
+
+  function exportCSV() {
+    const rows = [['Title', 'Company', 'Location', 'Salary', 'Score', 'Verdict', 'Status']];
+    allJobs.forEach(j => rows.push([j.title, j.company, j.location, j.salary, j.score, j.verdict, j.status]));
+    const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const a   = document.createElement('a');
+    a.href    = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'jobhunter-results.csv';
+    a.click();
+  }
+
+  function closeModal(e) {
+    if (e.target.id === 'modal') document.getElementById('modal').classList.remove('open');
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
